@@ -113,6 +113,11 @@ object Recorder {
         map.values.sortedBy { it.minuteStart }
     }
 
+    fun firstRecord(store: PowerStore): Long? = synchronized(lock) {
+        val p = pending.values.filter { it.measuredMs > 0 }.minOfOrNull { it.minuteStart }
+        listOfNotNull(store.firstMinute(), p).minOrNull()
+    }
+
     fun totalsSince(store: PowerStore, from: Long): Totals = synchronized(lock) {
         var t = store.sumSince(from)
         for (b in pending.values) if (b.minuteStart >= from) t += b.toTotals()

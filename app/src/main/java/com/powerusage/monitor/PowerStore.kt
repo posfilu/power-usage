@@ -70,6 +70,13 @@ class PowerStore private constructor(context: Context) :
         }
     }
 
+    /** 最早一条记录的时间，无记录时为 null */
+    fun firstMinute(): Long? {
+        readableDatabase.rawQuery("SELECT MIN(minute_start) FROM minute WHERE measured_ms > 0", null).use { c ->
+            return if (c.moveToFirst() && !c.isNull(0)) c.getLong(0) else null
+        }
+    }
+
     fun deleteBefore(time: Long) {
         writableDatabase.execSQL("DELETE FROM minute WHERE minute_start < ?", arrayOf(time))
     }

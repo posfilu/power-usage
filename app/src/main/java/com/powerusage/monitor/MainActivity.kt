@@ -34,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvNowDetail: TextView
     private lateinit var btnToggle: MaterialButton
     private lateinit var summaryGrid: GridLayout
+    private lateinit var energyGrid: GridLayout
     private lateinit var rangeGroup: MaterialButtonToggleGroup
     private lateinit var chart: BarChartView
     private lateinit var detailList: LinearLayout
@@ -42,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     private var lastSnapshot: Snapshot? = null
     private val minuteFmt = SimpleDateFormat("HH:mm", Locale.getDefault())
     private val hourFmt = SimpleDateFormat("MM-dd HH:00", Locale.getDefault())
+    private val dateFmt = SimpleDateFormat("MM-dd HH:mm", Locale.getDefault())
     private val hourShortFmt = SimpleDateFormat("HH时", Locale.getDefault())
 
     private val refresh = object : Runnable {
@@ -63,6 +65,7 @@ class MainActivity : AppCompatActivity() {
         tvNowDetail = findViewById(R.id.tvNowDetail)
         btnToggle = findViewById(R.id.btnToggle)
         summaryGrid = findViewById(R.id.summaryGrid)
+        energyGrid = findViewById(R.id.energyGrid)
         rangeGroup = findViewById(R.id.rangeGroup)
         chart = findViewById(R.id.chart)
         detailList = findViewById(R.id.detailList)
@@ -159,19 +162,34 @@ class MainActivity : AppCompatActivity() {
             Tile("本小时平均", Format.power(s.currentHour.avgMw),
                 "亮屏平均 ${Format.power(s.currentHour.screenOnAvgMw)}"),
         )
-        renderTiles(tiles)
+        renderTiles(summaryGrid, tiles)
+
+        val v = l?.voltageMv
+        fun energyTile(title: String, t: Totals, extra: String) = Tile(
+            title,
+            Format.energy(t.energyMwh),
+            listOf(Format.mah(t.energyMwh, v), extra).filter { it.isNotEmpty() }.joinToString(" · ") +
+                "\n亮屏 ${Format.energy(t.screenOnMwh)} · 息屏 ${Format.energy(t.screenOffMwh)}"
+        )
+        renderTiles(energyGrid, listOf(
+            energyTile("开机至今", b, "平均 ${Format.power(b.avgMw)}"),
+            energyTile("今天", s.today, "平均 ${Format.power(s.today.avgMw)}"),
+            energyTile("近24小时", s.last24h, "平均 ${Format.power(s.last24h.avgMw)}"),
+            energyTile("全部记录", s.allTime,
+                s.firstRecord?.let { "自 " + dateFmt.format(Date(it)) } ?: "暂无记录"),
+        ))
         renderDetail(s)
     }
 
     private class Tile(val title: String, val value: String, val sub: String)
 
-    private fun renderTiles(tiles: List<Tile>) {
-        if (summaryGrid.childCount != tiles.size) {
-            summaryGrid.removeAllViews()
-            repeat(tiles.size) { summaryGrid.addView(makeTileView()) }
+    private fun renderTiles(grid: GridLayout, tiles: List<Tile>) {
+        if (grid.childCount != tiles.size) {
+            grid.removeAllViews()
+            repeat(tiles.size) { grid.addView(makeTileView()) }
         }
         tiles.forEachIndexed { i, t ->
-            val card = summaryGrid.getChildAt(i) as MaterialCardView
+            val card = grid.getChildAt(i) as MaterialCardView
             val col = card.getChildAt(0) as LinearLayout
             (col.getChildAt(0) as TextView).text = t.title
             (col.getChildAt(1) as TextView).text = t.value
@@ -226,7 +244,7 @@ class MainActivity : AppCompatActivity() {
             (row.getChildAt(2) as TextView).text = when {
                 v.measuredMs == 0L && v.chargingMs > 0 -> "充电中"
                 v.measuredMs == 0L -> "无数据"
-                else -> "亮屏 ${Format.power(v.screenOnAvgMw)} · 息屏 ${Format.power(v.screenOffAvgMw)}"
+                else -> "耗电 ${Format.energy(v.energyMwh)} · 亮屏 ${Format.power(v.screenOnAvgMw)} · 息屏 ${Format.power(v.screenOffAvgMw)}"
             }
         }
     }

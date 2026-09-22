@@ -25,4 +25,15 @@ object Format {
         if (whole <= 0) "—" else String.format(Locale.US, "%.0f%%", 100.0 * part / whole)
 
     fun mwh(v: Double): String = String.format(Locale.US, "%.0f mWh", v)
+
+    /** 能量，≥1 Wh 时以 Wh 显示 */
+    fun energy(mwh: Double): String = when {
+        mwh >= 1000 -> String.format(Locale.US, "%.2f Wh", mwh / 1000)
+        mwh >= 10 -> String.format(Locale.US, "%.0f mWh", mwh)
+        else -> String.format(Locale.US, "%.1f mWh", mwh)
+    }
+
+    /** 按电压折算成电池容量 mAh（近似） */
+    fun mah(mwh: Double, voltageMv: Double?): String =
+        if (voltageMv == null || voltageMv <= 0) "" else String.format(Locale.US, "≈%.0f mAh", mwh / (voltageMv / 1000))
 }

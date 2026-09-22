@@ -83,6 +83,22 @@
             android:columnCount="2"
             android:useDefaultMargins="false" />
 
+        <!-- 总耗电量 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="8dp"
+            android:text="总耗电量"
+            android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+        <GridLayout
+            android:id="@+id/energyGrid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="2"
+            android:useDefaultMargins="false" />
+
         <!-- 明细 -->
         <TextView
             android:layout_width="wrap_content"

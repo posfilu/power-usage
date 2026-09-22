@@ -58,6 +58,8 @@ data class Totals(
 
     /** 能量换算为 mWh */
     val energyMwh: Double get() = energyMj / 3600.0
+    val screenOnMwh: Double get() = screenEnergyMj / 3600.0
+    val screenOffMwh: Double get() = (energyMj - screenEnergyMj) / 3600.0
 
     private fun avg(mj: Double, ms: Long): Double? = if (ms < 1000) null else mj / (ms / 1000.0)
 }
