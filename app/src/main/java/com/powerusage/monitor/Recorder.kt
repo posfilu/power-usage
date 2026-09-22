@@ -1,6 +1,5 @@
 package com.powerusage.monitor
 
-import kotlin.math.floorMod
 import kotlin.math.min
 
 /**
@@ -72,7 +71,7 @@ object Recorder {
         val total = (end - start).toDouble()
         var t = start
         while (t < end) {
-            val minuteStart = t - floorMod(t, MINUTE_MS)
+            val minuteStart = t - t.mod(MINUTE_MS)
             val segEnd = min(end, minuteStart + MINUTE_MS)
             val len = segEnd - t
             val b = pending.getOrPut(minuteStart) { MinuteBucket(minuteStart) }

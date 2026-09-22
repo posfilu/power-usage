@@ -2,7 +2,6 @@ package com.powerusage.monitor
 
 import android.os.SystemClock
 import java.util.TimeZone
-import kotlin.math.floorMod
 
 /** 界面需要的一次性统计快照 */
 class Snapshot(
@@ -23,7 +22,7 @@ object Stats {
         val now = System.currentTimeMillis()
         val elapsed = SystemClock.elapsedRealtime()
         val bootWall = now - elapsed
-        val curMinute = now - floorMod(now, MINUTE_MS)
+        val curMinute = now - now.mod(MINUTE_MS)
 
         // 近 60 分钟
         val minuteFrom = curMinute - 59 * MINUTE_MS
@@ -49,7 +48,7 @@ object Stats {
         return Snapshot(
             latest = Recorder.latest,
             sinceBootMs = elapsed,
-            sinceBoot = Recorder.totalsSince(store, bootWall - floorMod(bootWall, MINUTE_MS)),
+            sinceBoot = Recorder.totalsSince(store, bootWall - bootWall.mod(MINUTE_MS)),
             lastMinute = minutes[58].second,
             last60Min = minutes.fold(Totals()) { a, p -> a + p.second },
             currentHour = hours.last().second,
@@ -60,6 +59,6 @@ object Stats {
 
     private fun localHourStart(t: Long): Long {
         val offset = TimeZone.getDefault().getOffset(t)
-        return t - floorMod(t + offset, HOUR_MS)
+        return t - (t + offset).mod(HOUR_MS)
     }
 }
