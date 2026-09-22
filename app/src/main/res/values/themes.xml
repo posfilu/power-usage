@@ -1,0 +1,5 @@
+<resources>
+    <style name="Theme.PowerUsage" parent="Theme.Material3.DayNight">
+        <item name="colorPrimary">@color/accent</item>
+    </style>
+</resources>
